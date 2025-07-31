@@ -1,7 +1,7 @@
 import logging
 import logging.config
 
-from elma_recplot.elma_loader import load_rec
+from elma_recplot.elma_loader import load_rec, load_lev
 from elma_recplot.plot import draw_rec
 
 
@@ -36,8 +36,9 @@ def init_logging():
 
 if __name__ == "__main__":
     init_logging()
-    print("Hello")
-    logging.debug("HI")
-    rec = load_rec("ch5194_084Mie.rec")
-    fig = draw_rec(rec)
+    with open("22.lev", "rb") as lev_file:
+        lev = load_lev(lev_file)
+    with open("22wr.rec", "rb") as rec_file:
+        rec = load_rec(rec_file)
+    fig = draw_rec(rec, lev)
     fig.write_html("rec_plot.html")
