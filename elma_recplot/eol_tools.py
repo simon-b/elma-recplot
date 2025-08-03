@@ -1,7 +1,8 @@
+from io import BytesIO
+
 import requests
 from cachecontrol import CacheControl
 from cachecontrol.caches import SeparateBodyFileCache
-from io import BytesIO
 from cachecontrol.heuristics import ExpiresAfter
 
 # Cache response content for files; valid rec/lev files but obfuscated names...

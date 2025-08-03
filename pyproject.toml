@@ -22,3 +22,6 @@ dev = [
     "ipython>=9.4.0",
     "ruff>=0.12.4",
 ]
+
+[tool.ruff.lint]
+select = ["I"]

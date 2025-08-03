@@ -1,11 +1,11 @@
-import numpy as np
-import polars as pl
-
-from elma_recplot.elma_loader import VOLT_LEFT, VOLT_RIGHT, Rec, Lev, ObjType
-import plotly.graph_objects as go
 import logging
+
+import numpy as np
+import plotly.graph_objects as go
+import polars as pl
 from rich.progress import track
 
+from elma_recplot.elma_loader import VOLT_LEFT, VOLT_RIGHT, Lev, ObjType, Rec
 
 KUSKI_COLOR = "#1f77b4"
 HEAD_COLOR = "#ff7f0e"

@@ -1,10 +1,11 @@
-import struct
 import logging
+import struct
 import typing
-import numpy as np
-import polars as pl
 from dataclasses import dataclass
 from enum import Enum
+
+import numpy as np
+import polars as pl
 
 logger = logging.getLogger(__name__)
 

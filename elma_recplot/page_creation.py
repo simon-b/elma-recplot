@@ -1,15 +1,16 @@
-from elma_recplot.elma_loader import load_rec, load_lev
-from elma_recplot.plot import draw_rec
-from elma_recplot.eol_tools import (
-    get_lev_by_id,
-    get_rec_by_id_and_name,
-    get_latest_replays,
-)
-from rich.progress import track
+import logging
+import os
 
 import polars as pl
-import os
-import logging
+from rich.progress import track
+
+from elma_recplot.elma_loader import load_lev, load_rec
+from elma_recplot.eol_tools import (
+    get_latest_replays,
+    get_lev_by_id,
+    get_rec_by_id_and_name,
+)
+from elma_recplot.plot import draw_rec
 
 logger = logging.getLogger(__name__)
 
