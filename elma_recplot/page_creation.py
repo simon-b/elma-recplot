@@ -1,5 +1,3 @@
-from elma_recplot.util import init_logging
-
 from elma_recplot.elma_loader import load_rec, load_lev
 from elma_recplot.plot import draw_rec
 from elma_recplot.eol_tools import (
@@ -16,9 +14,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def make_recent_replay_page(index_page="index.md", rec_dir="."):
+def make_recent_replay_page(index_page="index.md", rec_dir=".", num: int = 20):
     # For fun, use polars here
-    latest_replays = pl.json_normalize(get_latest_replays(num=100)).with_columns(
+    latest_replays = pl.json_normalize(get_latest_replays(num=num)).with_columns(
         (pl.col("RecFileName").str.strip_suffix(".rec") + ".html").alias("rec_base"),
     )
     for row in track(
@@ -57,11 +55,3 @@ def make_recent_replay_page(index_page="index.md", rec_dir="."):
     logger.info(f"Saving file {index_page!r}")
     with open(index_page, "w", encoding="utf-8") as f:
         f.write(page_df.to_pandas().to_markdown(index=False))
-
-
-if __name__ == "__main__":
-    init_logging()
-    make_recent_replay_page(
-        index_page="/home/shb/elma-recplot-page/docs/_posts/2025-08-02-recent-recs.md",
-        rec_dir="/home/shb/elma-recplot-page/docs/recs",
-    )
