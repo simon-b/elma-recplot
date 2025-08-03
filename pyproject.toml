@@ -25,3 +25,12 @@ dev = [
 
 [tool.ruff.lint]
 select = ["I"]
+
+[build-system]
+requires = ["setuptools"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.scripts]
+elma-recplot = "elma_recplot.__main__:cli"
