@@ -14,9 +14,8 @@ logger = logging.getLogger("elma_recplot")
 
 
 @click.group()
-def cli(): 
+def cli():
     init_logging()
-
 
 
 @cli.command(help="DL lev by ID")
@@ -53,17 +52,18 @@ def plot_rec(rec_file, lev_file, outfile):
 @cli.command(help="Create a page with recent replays")
 @click.option(
     "--index-page",
-    default=os.path.join("_posts", "{}-recent-recs.md").format(
-        datetime.now().strftime("%Y-%m-%d")
-    ),
+    default="{}-recent-recs.md".format(datetime.now().strftime("%Y-%m-%d")),
     type=click.Path(),
 )
+@click.option("--index-dir", default=".", type=click.Path(exists=True, file_okay=False))
 @click.option(
     "--rec-dir", default="recs", type=click.Path(exists=True, file_okay=False)
 )
 @click.option("--num", default=20, type=int)
-def make_page(index_page, rec_dir, num):
-    make_recent_replay_page(index_page=index_page, rec_dir=rec_dir, num=num)
+def make_page(index_page, index_dir, rec_dir, num):
+    make_recent_replay_page(
+        index_page=os.path.join(index_dir, index_page), rec_dir=rec_dir, num=num
+    )
 
 
 if __name__ == "__main__":
