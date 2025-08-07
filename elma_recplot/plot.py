@@ -20,8 +20,8 @@ OBJ_COLORS = {
     ObjType.PLAYER: "#ff9100",
 }
 VOLT_COLOR = {
-    VOLT_RIGHT: "#b6286f",
-    VOLT_LEFT: "#D889CB",
+    VOLT_RIGHT: "#000080",
+    VOLT_LEFT: "#00D1D5",
 }
 VOLT_WIDTH = {
     VOLT_RIGHT: 4,
