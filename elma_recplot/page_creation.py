@@ -1,6 +1,7 @@
 import logging
 import os
 
+import plotly.io as pio
 import polars as pl
 from rich.progress import track
 
@@ -10,7 +11,7 @@ from elma_recplot.eol_tools import (
     get_lev_by_id,
     get_rec_by_id_and_name,
 )
-from elma_recplot.plot import draw_rec
+from elma_recplot.plot import draw_event_timeline, draw_rec
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +32,18 @@ def make_recent_replay_page(index_page="index.md", rec_dir=".", num: int = 20):
             continue
         lev = load_lev(get_lev_by_id(row["LevelIndex"]))
         rec = load_rec(get_rec_by_id_and_name(row["UUID"], row["RecFileName"]))
-        fig = draw_rec(rec, lev)
+        fig_map = draw_rec(rec, lev)
         title = "{lev} - {kuski} ({time:.2f}s)".format(
             kuski=row["DrivenByData.Kuski"],
             lev=row["LevelData.LevelName"],
             time=row["ReplayTime"] / 1000,
         )
-        fig.update_layout(title_text=title)
+        fig_map.update_layout(title_text=title)
+        fig_events = draw_event_timeline(rec)
         logger.info(f"Saving file {outfile!r}")
-        fig.write_html(outfile, include_plotlyjs="cdn")
+        with open(outfile, "w", encoding="utf-8") as f:
+            pio.write_html(fig_map, file=f, include_plotlyjs="cdn")
+            pio.write_html(fig_events, file=f, include_plotlyjs=False)
 
     def _rec_link(rec):
         return f"[{rec}](recs/{rec})"

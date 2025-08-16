@@ -10,8 +10,6 @@ import polars as pl
 logger = logging.getLogger(__name__)
 
 #  TODO: verify these constants
-VOLT_RIGHT = 6  # TODO: event type enum?
-VOLT_LEFT = 7  # TODO: event type enum?
 MAGIC_TIME_SCALER = 0.001 / (0.182 * 0.0024)
 REL_POS_SCALER = 1000
 REC_HEADER_SIZE = 36
@@ -24,11 +22,23 @@ assert struct.calcsize(REC_HEADER_FORMAT_STR) == REC_HEADER_SIZE
 assert struct.calcsize(LEV_HEADER_FORMAT_STR) == LEV_HEADER_SIZE
 
 
+# Two enums defined, but not actually stored in polars df.
+#  Can be stored via `pl.col("...")..map_elements(ObjType, return_dtype=object)`
+#  But this column will then not permit all polars operations well
 class ObjType(Enum):
     EXIT = 1
     APPLE = 2
     KILLER = 3
     PLAYER = 4
+
+
+class EventType(Enum):
+    OBJ_TOUCH = 0
+    GROUND = 1
+    APPLE = 4
+    TURN = 5
+    VOLT_LEFT = 7
+    VOLT_RIGHT = 6
 
 
 @dataclass
@@ -114,7 +124,9 @@ def load_rec(rec_data: typing.BinaryIO) -> Rec:
                 ]
             ),
         )
-    ).with_columns(pl.col("timestamp") * MAGIC_TIME_SCALER)
+    ).with_columns(
+        pl.col("timestamp") * MAGIC_TIME_SCALER,
+    )
     logger.info(f"Loaded {len(events_df)} events")
 
     return Rec(
@@ -210,7 +222,6 @@ def load_lev(lev_data: typing.BinaryIO) -> Lev:
             ),
         )
     ).with_columns(
-        pl.col("object_type").map_elements(ObjType, return_dtype=object),
         pl.col("y") * -1.0,
     )
 

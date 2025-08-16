@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import polars as pl
 from rich.progress import track
 
-from elma_recplot.elma_loader import VOLT_LEFT, VOLT_RIGHT, Lev, ObjType, Rec
+from elma_recplot.elma_loader import EventType, Lev, ObjType, Rec
 
 KUSKI_COLOR = "#1f77b4"
 HEAD_COLOR = "#ff7f0e"
@@ -20,12 +20,12 @@ OBJ_COLORS = {
     ObjType.PLAYER: "#ff9100",
 }
 VOLT_COLOR = {
-    VOLT_RIGHT: "#000080",
-    VOLT_LEFT: "#00D1D5",
+    EventType.VOLT_RIGHT: "#000080",
+    EventType.VOLT_LEFT: "#00D1D5",
 }
 VOLT_WIDTH = {
-    VOLT_RIGHT: 4,
-    VOLT_LEFT: 2,
+    EventType.VOLT_RIGHT: 4,
+    EventType.VOLT_LEFT: 2,
 }
 ITEM_RADIUS = 0.4
 BIKE_COLOR = {
@@ -120,7 +120,9 @@ def add_rec_to_fig(rec, fig):
     )
 
     events_to_draw = rec.events.filter(
-        pl.col("event_type").is_in([VOLT_LEFT, VOLT_RIGHT])
+        pl.col("event_type").is_in(
+            {EventType.VOLT_LEFT.value, EventType.VOLT_RIGHT.value}
+        )
     ).sort("timestamp")
     if len(events_to_draw) > MAX_DRAW_EVENTS:
         logger.warning(
@@ -133,7 +135,7 @@ def add_rec_to_fig(rec, fig):
         for row in events_to_draw.iter_rows(named=True):
             timestamp = row["timestamp"]
             event_type = row["event_type"]
-            if event_type not in {VOLT_LEFT, VOLT_RIGHT}:
+            if event_type not in {EventType.VOLT_LEFT, EventType.VOLT_RIGHT}:
                 continue
             idx = rec.frames["t"].search_sorted(timestamp)
             if idx >= len(rec.frames["t"]):
@@ -175,7 +177,7 @@ def add_rec_to_fig(rec, fig):
             x=[None],
             y=[None],
             mode="lines",
-            line=dict(color=VOLT_COLOR[VOLT_LEFT], width=2),
+            line=dict(color=VOLT_COLOR[EventType.VOLT_LEFT], width=2),
             name="Left volt",
             legendgroup="Volts",
         )
@@ -185,7 +187,7 @@ def add_rec_to_fig(rec, fig):
             x=[None],
             y=[None],
             mode="lines",
-            line=dict(color=VOLT_COLOR[VOLT_RIGHT], width=4),
+            line=dict(color=VOLT_COLOR[EventType.VOLT_RIGHT], width=4),
             name="Right volt",
             legendgroup="Volts",
         )
@@ -255,3 +257,52 @@ def _add_circle(fig, x, y, color, radius=ITEM_RADIUS, opacity=0.2):
         fillcolor=color,
         opacity=opacity,
     )
+
+
+def draw_event_timeline(rec: Rec) -> go.Figure:
+    df_events = rec.events.with_columns(
+        pl.col("event_type")
+        .map_elements(lambda el: EventType(el).name, return_dtype=str)
+        .alias("event_name")
+    )
+    fig = go.Figure()
+    for (name,), group in df_events.group_by("event_name"):
+        fig.add_trace(
+            go.Scatter(
+                x=group["timestamp"], y=group["event_name"], name=name, mode="markers"
+            )
+        )
+
+    df_gas_state = rec.frames.with_columns(
+        pl.when(pl.col("is_gasing_right"))
+        .then(pl.lit("Gas Right"))
+        .when(pl.col("is_gasing_left"))
+        .then(pl.lit("Gas Left"))
+        .otherwise(pl.lit("No Gas"))
+        .alias("gas_state")
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df_gas_state["t"],
+            y=df_gas_state["gas_state"],
+            mode="lines",
+            name="Gas state",
+            line=dict(color="blue"),
+        )
+    )
+    fig.update_yaxes(
+        categoryorder="array",
+        categoryarray=[
+            "Gas Left",
+            "No Gas",
+            "Gas Right",
+            EventType.TURN.name,
+            EventType.VOLT_LEFT.name,
+            EventType.VOLT_RIGHT.name,
+            EventType.OBJ_TOUCH.name,
+            EventType.APPLE.name,
+            EventType.GROUND.name,
+        ],
+    )
+    fig.update_layout(xaxis_title="Time")
+    return fig

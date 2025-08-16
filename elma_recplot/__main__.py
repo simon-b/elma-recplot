@@ -3,11 +3,12 @@ import os
 from datetime import datetime
 
 import click
+import plotly.io as pio
 
 from elma_recplot.elma_loader import load_lev, load_rec
 from elma_recplot.eol_tools import get_lev_by_id, get_rec_by_id_and_name
 from elma_recplot.page_creation import make_recent_replay_page
-from elma_recplot.plot import draw_rec
+from elma_recplot.plot import draw_event_timeline, draw_rec
 from elma_recplot.util import init_logging
 
 logger = logging.getLogger("elma_recplot")
@@ -44,9 +45,11 @@ def get_rec(rec_id: str, rec_name: str, outfile):
 def plot_rec(rec_file, lev_file, outfile):
     rec = load_rec(rec_file)
     lev = load_lev(lev_file)
-    fig = draw_rec(rec, lev)
+    fig_map = draw_rec(rec, lev)
+    fig_events = draw_event_timeline(rec)
     logger.info(f"Saving plot to {outfile.name!r}")
-    fig.write_html(outfile, include_plotlyjs="cdn")
+    pio.write_html(fig_map, file=outfile, include_plotlyjs="cdn")
+    pio.write_html(fig_events, file=outfile, include_plotlyjs=False)
 
 
 @cli.command(help="Create a page with recent replays")
