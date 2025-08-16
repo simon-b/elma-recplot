@@ -20,11 +20,13 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipython>=9.4.0",
+    "pre-commit>=4.3.0",
     "ruff>=0.12.4",
+    "streamlit>=1.48.1",
 ]
 
 [tool.ruff.lint]
-select = ["I"]
+select = ["I", "TID"]
 
 [build-system]
 requires = ["setuptools"]
