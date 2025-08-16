@@ -134,7 +134,7 @@ def add_rec_to_fig(rec, fig):
         logger.info(f"Drawing {len(events_to_draw)} volt events")
         for row in events_to_draw.iter_rows(named=True):
             timestamp = row["timestamp"]
-            event_type = row["event_type"]
+            event_type = EventType(row["event_type"])
             if event_type not in {EventType.VOLT_LEFT, EventType.VOLT_RIGHT}:
                 continue
             idx = rec.frames["t"].search_sorted(timestamp)
