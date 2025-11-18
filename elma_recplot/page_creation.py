@@ -30,6 +30,7 @@ def make_recent_replay_page(index_page="index.md", rec_dir=".", num: int = 20):
         if os.path.exists(outfile):
             logger.info(f"Skipping existing file {outfile!r}")
             continue
+        logger.info(f"Attempting to create {outfile!r}")
         lev = load_lev(get_lev_by_id(row["LevelIndex"]))
         rec = load_rec(get_rec_by_id_and_name(row["UUID"], row["RecFileName"]))
         fig_map = draw_rec(rec, lev)
