@@ -197,12 +197,9 @@ def add_rec_to_fig(rec, fig):
 def add_lev_to_fig(lev, fig):
     poly_data = lev.polygons_coords.join(lev.polygons, on="index", how="inner")
     # TODO: if largest poly is filled, we should invert all
-    logger.info(f"Poly data schema: {poly_data.collect_schema()!r}")
-    logger.info(f"Poly data columns: {poly_data.columns!r}")
-    logger.info(poly_data.head())
     for (idx,), group in poly_data.filter(
         (~pl.col("is_grass")) & (pl.col("area") < 0)
-    ).group_by("index"):
+    ).rename({"index": "poly_index"}).group_by("poly_index"):
         fig.add_trace(
             go.Scatter(
                 x=group["x"],
